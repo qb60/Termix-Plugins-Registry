@@ -1,0 +1,6 @@
+Termix Plugins Registry
+Copyright 2026 Custom Termix plugin registry contributors.
+Package layout, signature verification and channel conventions derived from:
+https://github.com/Termix-SSH/Termix-Registry
+Copyright 2026 Luke Gustafson and Termix contributors, Apache-2.0.
+The vendored registry-index-schema.json retains the upstream schema.

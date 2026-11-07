@@ -1,0 +1,172 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Termix-SSH/Termix-Registry/registry-index-schema.json",
+  "title": "Termix plugin registry index",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["registry", "name", "apiVersion", "updatedAt", "plugins"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "registry": {
+      "description": "Short id of this registry, for example official.",
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*$"
+    },
+    "name": { "type": "string", "minLength": 1 },
+    "apiVersion": {
+      "description": "Version of this index format.",
+      "const": 1
+    },
+    "publicKey": {
+      "description": "Base64 Ed25519 public key every release here is signed with. Termix shows its fingerprint when an admin adds the registry and pins it.",
+      "type": "string",
+      "pattern": "^[A-Za-z0-9+/]{43}=$"
+    },
+    "updatedAt": { "type": "string", "format": "date-time" },
+    "plugins": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/plugin" }
+    }
+  },
+  "$defs": {
+    "plugin": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "description",
+        "author",
+        "category",
+        "repository",
+        "icon",
+        "versions"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]*$",
+          "maxLength": 64
+        },
+        "name": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "description": { "type": "string", "maxLength": 500 },
+        "author": { "type": "string", "minLength": 1 },
+        "category": { "type": "string", "minLength": 1 },
+        "repository": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://"
+        },
+        "icon": {
+          "description": "A Lucide icon name, the same as manifest icon.",
+          "type": "string",
+          "pattern": "^[A-Za-z0-9]+$"
+        },
+        "video": {
+          "description": "The manifest's YouTube link. Termix embeds only the video id.",
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://"
+        },
+        "features": {
+          "description": "Short lines listing what the plugin does, from the manifest.",
+          "type": "array",
+          "maxItems": 20,
+          "items": { "type": "string", "minLength": 1, "maxLength": 160 }
+        },
+        "docs": {
+          "description": "Where the plugin's docs live. The manifest's docs link, or the registry's docsBase plus the id.",
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://"
+        },
+        "versions": {
+          "description": "Stable releases, newest first.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/version" }
+        },
+        "prereleases": {
+          "description": "Betas newer than the newest stable release, newest first. Kept apart so older Termix builds never offer them.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/version" }
+        },
+        "gated": {
+          "description": "Stable and beta releases that need a newer Termix than 26.10.2, newest first. Builds up to 26.10.2 never read this list, so they never offer these.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/version" }
+        },
+        "contributes": {
+          "description": "The manifest's contributes keys, so Termix can filter by what a plugin adds.",
+          "type": "array",
+          "items": { "type": "string", "pattern": "^[A-Za-z]+$" },
+          "uniqueItems": true
+        }
+      }
+    },
+    "version": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "version",
+        "api",
+        "url",
+        "sha256",
+        "signature",
+        "size",
+        "capabilities",
+        "releaseNotesUrl",
+        "publishedAt"
+      ],
+      "properties": {
+        "version": {
+          "type": "string",
+          "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(-[0-9A-Za-z.-]+)?$"
+        },
+        "api": {
+          "description": "The plugin API major version from manifest engine.api.",
+          "type": "string",
+          "pattern": "^[0-9]+$"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://.*\\.tmxplug$"
+        },
+        "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "signature": {
+          "description": "Base64 Ed25519 signature over the raw sha256 of the .tmxplug.",
+          "type": "string",
+          "pattern": "^[A-Za-z0-9+/]{86}==$"
+        },
+        "size": { "type": "integer", "minimum": 1 },
+        "capabilities": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^[a-z]+:[a-z-]+$" },
+          "uniqueItems": true
+        },
+        "engine": {
+          "description": "The manifest's engine ranges. api is kept as a major above for older Termix builds.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["api", "termix"],
+          "properties": {
+            "api": { "type": "string", "minLength": 1 },
+            "termix": { "type": "string", "minLength": 1 }
+          }
+        },
+        "dependencies": {
+          "description": "Plugins this version needs, by id, with a semver range.",
+          "type": "object",
+          "additionalProperties": { "type": "string", "minLength": 1 }
+        },
+        "releaseNotesUrl": { "type": "string", "format": "uri" },
+        "notes": {
+          "description": "This version's section of the plugin's CHANGELOG.md, as Markdown.",
+          "type": "string",
+          "maxLength": 20000
+        },
+        "publishedAt": { "type": "string", "format": "date-time" }
+      }
+    }
+  }
+}

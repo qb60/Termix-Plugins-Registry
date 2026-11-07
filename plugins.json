@@ -1,0 +1,10 @@
+{
+  "registry": "custom-plugins",
+  "name": "Custom Termix Plugins",
+  "publicKeyFile": "registry.pub",
+  "plugins": [
+    {
+      "repository": "qb60/Termix-Plugin-Host-Web-Launcher"
+    }
+  ]
+}

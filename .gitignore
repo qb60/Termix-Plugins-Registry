@@ -1,0 +1,8 @@
+node_modules/
+public/
+state/
+keys/
+*.key
+*.tmxplug
+*.sig
+.env
